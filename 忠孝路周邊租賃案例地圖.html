@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>忠孝路181巷7-2號周邊1公里租賃案例地圖</title>
+<title>忠孝路181巷7號周邊1公里租賃案例地圖</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
@@ -20,15 +20,16 @@ body { margin: 0; font-family: "Microsoft JhengHei", Arial, sans-serif; }
 </head>
 <body>
 <div class="title-bar">
-  忠孝路181巷7-2號 周邊1公里租賃案例分布圖
-  <span class="subtitle">資料來源：591租屋網、我家網、樂屋網 | 2026年4月</span>
+  民權路與忠孝路口 周邊1公里租賃案例分布圖
+  <span class="subtitle">目標地址：忠孝路181巷7號 | 資料來源：591租屋網、樂屋網 | 2026年4月</span>
 </div>
 <div class="info-panel">
-  ★ 紅色標記 = 目標地址 | 各色圓點 = 出租中物件（依類型區分）| 虛線圓 = 1公里範圍
+  ★ 紅色標記 = 目標地址（民權路與忠孝路口） | 各色圓點 = 出租中物件（依類型區分）| 虛線圓 = 1公里範圍
 </div>
 <div id="map"></div>
 <script>
-var map = L.map('map').setView([23.4917, 120.4530], 15);
+var center = [23.482902, 120.453096];
+var map = L.map('map').setView(center, 15);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; OpenStreetMap contributors',
@@ -36,7 +37,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 // 1km circle
-L.circle([23.4917, 120.4530], {
+L.circle(center, {
   radius: 1000,
   color: '#1F4E79',
   fillColor: '#2E75B6',
@@ -52,8 +53,8 @@ var targetIcon = L.divIcon({
   iconAnchor: [13, 13],
   className: ''
 });
-L.marker([23.4917, 120.4530], {icon: targetIcon}).addTo(map)
-  .bindPopup('<b style="color:#E63946;">★ 目標地址</b><br>忠孝路181巷7-2號<br><span style="color:#888;">嘉北生活圈</span>');
+L.marker(center, {icon: targetIcon}).addTo(map)
+  .bindPopup('<b style="color:#E63946;">★ 目標地址</b><br>忠孝路181巷7號<br><span style="color:#666;">民權路與忠孝路口</span><br><span style="color:#888;">嘉北生活圈</span>');
 
 // Color-coded icons by type
 function makeIcon(color) {
@@ -71,57 +72,55 @@ var iconSuite = makeIcon('#27AE60');     // 套房
 var iconYafang = makeIcon('#8E44AD');    // 雅房
 var iconShop = makeIcon('#7F8C8D');      // 店面/商用
 
-// Rental listings data (within ~1km of target)
+// Rental listings data (within ~1km of 民權路與忠孝路口)
 var listings = [
   // 整層住家/大樓
-  {lat: 23.4925, lng: 120.4545, type: '整層住家', icon: iconWhole,
-   title: '忠孝路星巴克美兩房', addr: '忠孝北街華廈', ping: '16.4坪', layout: '2房2廳', rent: '20,000元/月'},
-  {lat: 23.4910, lng: 120.4520, type: '整層住家', icon: iconWhole,
+  {lat: 23.4845, lng: 120.4528, type: '整層住家', icon: iconWhole,
    title: '兆基 忠孝路三房花園宅', addr: '忠孝路', ping: '38.4坪', layout: '4房2廳', rent: '22,000元/月'},
-  {lat: 23.4900, lng: 120.4510, type: '整層住家', icon: iconWhole,
+  {lat: 23.4855, lng: 120.4520, type: '整層住家', icon: iconWhole,
    title: '兆基 東區忠孝路商圈', addr: '忠孝路(大寶鎮)', ping: '23.8坪', layout: '5房2廳', rent: '15,000元/月'},
-  {lat: 23.4935, lng: 120.4560, type: '整層住家', icon: iconWhole,
-   title: '耐斯百貨旁公寓全新整理', addr: '仁義新村28號', ping: '20坪', layout: '2房2廳', rent: '16,000元/月'},
-  {lat: 23.4880, lng: 120.4555, type: '整層住家', icon: iconWhole,
+  {lat: 23.4870, lng: 120.4545, type: '整層住家', icon: iconWhole,
+   title: '忠孝路星巴克美兩房', addr: '忠孝北街華廈', ping: '16.4坪', layout: '2房2廳', rent: '20,000元/月'},
+  {lat: 23.4810, lng: 120.4550, type: '整層住家', icon: iconWhole,
    title: '安嘉租賃 2房採光佳', addr: '敦南苑', ping: '—', layout: '2房', rent: '18,000元/月'},
-  {lat: 23.4950, lng: 120.4500, type: '整層住家', icon: iconWhole,
-   title: '耐斯商圈大寶鎮美寓3房', addr: '東區忠孝路商圈', ping: '—', layout: '3房', rent: '15,000元/月'},
-  {lat: 23.4870, lng: 120.4570, type: '整層住家', icon: iconWhole,
+  {lat: 23.4790, lng: 120.4565, type: '整層住家', icon: iconWhole,
    title: '精裝3房(吳鳳南路)', addr: '吳鳳南路', ping: '58坪', layout: '3房', rent: '38,000元/月'},
-  {lat: 23.4942, lng: 120.4515, type: '整層住家', icon: iconWhole,
-   title: '嘉工美3房', addr: '東區', ping: '45坪', layout: '3房2廳2衛', rent: '20,000元/月'},
+  {lat: 23.4775, lng: 120.4500, type: '整層住家', icon: iconWhole,
+   title: '垂楊路生活機能方便', addr: '垂楊路26巷', ping: '30坪', layout: '4房2廳', rent: '9,000元/月'},
 
   // 透天
-  {lat: 23.4905, lng: 120.4535, type: '整層透天', icon: iconTownhouse,
+  {lat: 23.4840, lng: 120.4535, type: '整層透天', icon: iconTownhouse,
    title: '忠孝路旁透天住家', addr: '忠孝路旁', ping: '30坪', layout: '4房1廳2衛', rent: '22,000元/月'},
-  {lat: 23.4960, lng: 120.4525, type: '透天店面', icon: iconTownhouse,
-   title: '北興市場旁透天店面', addr: '北興市場旁', ping: '107.8坪', layout: '—', rent: '35,000元/月'},
 
   // 獨立套房
-  {lat: 23.4920, lng: 120.4550, type: '獨立套房', icon: iconSuite,
-   title: '好市多對面/嘉基旁套房(限女)', addr: '忠孝路', ping: '8坪', layout: '1房', rent: '5,500元/月'},
-  {lat: 23.4912, lng: 120.4540, type: '獨立套房', icon: iconSuite,
+  {lat: 23.4832, lng: 120.4538, type: '獨立套房', icon: iconSuite,
    title: '嘉基/陽明/市政府套房', addr: '忠孝路(民權路口)', ping: '12坪', layout: '1房', rent: '5,000元/月'},
-  {lat: 23.4890, lng: 120.4580, type: '獨立套房', icon: iconSuite,
-   title: '飯店式電梯套房', addr: '立仁路10巷16號', ping: '8坪', layout: '1房', rent: '9,000元/月'},
-  {lat: 23.4875, lng: 120.4545, type: '獨立套房', icon: iconSuite,
-   title: '崇文國小美3房(套房)', addr: '崇文國小附近', ping: '35坪', layout: '3房2衛', rent: '18,800元/月'},
-  {lat: 23.4895, lng: 120.4565, type: '獨立套房', icon: iconSuite,
-   title: '文化路優雅美套房', addr: '中正路414號', ping: '5.2坪', layout: '1房', rent: '6,000元/月'},
-  {lat: 23.4888, lng: 120.4490, type: '獨立套房', icon: iconSuite,
+  {lat: 23.4828, lng: 120.4510, type: '獨立套房', icon: iconSuite,
+   title: '市區優質電梯套房', addr: '民權路', ping: '6坪', layout: '1房', rent: '6,500元/月'},
+  {lat: 23.4826, lng: 120.4555, type: '獨立套房', icon: iconSuite,
+   title: '民權路套房出租', addr: '民權路155號', ping: '6坪', layout: '1房', rent: '8,000元/月'},
+  {lat: 23.4825, lng: 120.4490, type: '獨立套房', icon: iconSuite,
+   title: '健身頂加大陽台套房', addr: '民權路89號', ping: '18坪', layout: '1房', rent: '6,000元/月'},
+  {lat: 23.4835, lng: 120.4515, type: '獨立套房', icon: iconSuite,
+   title: '市區優質電梯套房(二)', addr: '民權路', ping: '7坪', layout: '1房', rent: '7,000元/月'},
+  {lat: 23.4778, lng: 120.4495, type: '獨立套房', icon: iconSuite,
    title: '垂楊路電梯大樓套房', addr: '垂楊路', ping: '7坪', layout: '1房', rent: '8,000元/月'},
-  {lat: 23.4945, lng: 120.4580, type: '獨立套房', icon: iconSuite,
-   title: '芳安路套房(可租補)', addr: '芳安路335巷', ping: '5.7坪', layout: '1房', rent: '11,000元/月'},
+  {lat: 23.4808, lng: 120.4580, type: '獨立套房', icon: iconSuite,
+   title: '文化路優雅美套房', addr: '中正路414號', ping: '5.2坪', layout: '1房', rent: '6,000元/月'},
+  {lat: 23.4800, lng: 120.4575, type: '獨立套房', icon: iconSuite,
+   title: '東市場電梯大套房', addr: '中正路191號', ping: '12坪', layout: '1房', rent: '10,000元/月'},
+  {lat: 23.4815, lng: 120.4585, type: '獨立套房', icon: iconSuite,
+   title: '文化路套房高樓景觀', addr: '中正路(賺錢廣場)', ping: '9坪', layout: '1房', rent: '8,500元/月'},
+  {lat: 23.4805, lng: 120.4570, type: '獨立套房', icon: iconSuite,
+   title: '嘉義市中心中正路套房', addr: '中正路325號', ping: '5坪', layout: '1房', rent: '7,000元/月'},
+  {lat: 23.4795, lng: 120.4545, type: '獨立套房', icon: iconSuite,
+   title: '崇文國小美3房', addr: '崇文國小附近', ping: '35坪', layout: '3房2衛', rent: '18,800元/月'},
+  {lat: 23.4812, lng: 120.4590, type: '獨立套房', icon: iconSuite,
+   title: '兆基文化路商圈機能套房', addr: '中正路', ping: '4.9坪', layout: '1房', rent: '6,000元/月'},
 
   // 雅房
-  {lat: 23.4930, lng: 120.4540, type: '雅房', icon: iconYafang,
-   title: '忠孝路539號雅房(近嘉基)', addr: '忠孝路539號', ping: '5坪', layout: '雅房', rent: '5,000元/月'},
-
-  // 商用
-  {lat: 23.4940, lng: 120.4570, type: '店面', icon: iconShop,
-   title: '忠孝路大樓+平面車位(商辦)', addr: '忠孝路', ping: '83坪', layout: '—', rent: '20,000元/月'},
-  {lat: 23.4955, lng: 120.4548, type: '店面', icon: iconShop,
-   title: '興美六路店面', addr: '興美六路', ping: '20.1坪', layout: '—', rent: '25,000元/月'},
+  {lat: 23.4810, lng: 120.4575, type: '雅房', icon: iconYafang,
+   title: '女生住宿近文化路中正路口', addr: '中正路388號', ping: '6坪', layout: '雅房', rent: '3,600元/月'},
 ];
 
 listings.forEach(function(item) {
