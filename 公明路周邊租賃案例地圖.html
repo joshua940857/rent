@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>公明路372號周邊1公里租賃案例地圖</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+body { margin: 0; font-family: "Microsoft JhengHei", "Noto Sans TC", Arial, sans-serif; }
+#map { width: 100%; height: calc(100vh - 80px); min-height: 600px; }
+.legend { background: white; padding: 12px 16px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); line-height: 1.8; font-size: 13px; max-width: 200px; }
+.legend h4 { margin: 0 0 8px 0; font-size: 14px; color: #1F4E79; }
+.legend-item { display: flex; align-items: center; gap: 8px; }
+.legend-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3); flex-shrink: 0; }
+.title-bar { background: #1F4E79; color: white; padding: 12px 20px; font-size: 16px; font-weight: bold; }
+.subtitle { font-size: 12px; font-weight: normal; color: #B0CDE0; margin-left: 12px; }
+.info-panel { background: #f8f9fa; padding: 10px 20px; font-size: 13px; color: #555; border-bottom: 1px solid #ddd; }
+.filter-bar { background: #fff; padding: 8px 20px; border-bottom: 1px solid #ddd; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.filter-btn { padding: 4px 12px; border: 1px solid #ccc; border-radius: 16px; cursor: pointer; font-size: 12px; background: #fff; transition: all 0.2s; }
+.filter-btn:hover { background: #f0f0f0; }
+.filter-btn.active { background: #1F4E79; color: white; border-color: #1F4E79; }
+.popup-link { display: inline-block; margin-top: 6px; padding: 4px 10px; background: #1F4E79; color: white; text-decoration: none; border-radius: 4px; font-size: 12px; }
+.popup-link:hover { background: #2E75B6; }
+.popup-tag { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 10px; margin-right: 4px; }
+.tag-furniture { background: #E8F5E9; color: #2E7D32; }
+.tag-no-furniture { background: #FFEBEE; color: #C62828; }
+.tag-renovated { background: #E3F2FD; color: #1565C0; }
+.tag-no-renovate { background: #FFF3E0; color: #E65100; }
+</style>
+</head>
+<body>
+<div class="title-bar">
+  公明路與中山路口 周邊1公里租賃案例分布圖
+  <span class="subtitle">目標地址：公明路372號 | 資料來源：591租屋網、我家網、樂屋網 | 2026年4月</span>
+</div>
+<div class="info-panel">
+  ★ 紅色標記 = 目標地址（公明路與中山路口） | 各色圓點 = 出租中物件（依類型區分）| 虛線圓 = 1公里範圍 | <b>點擊圓點可查看詳情並連結至來源網站</b>
+</div>
+<div class="filter-bar">
+  <span style="font-size:12px;color:#888;">篩選：</span>
+  <span class="filter-btn active" onclick="filterType('all')">全部</span>
+  <span class="filter-btn" onclick="filterType('整層住家')">整層住家</span>
+  <span class="filter-btn" onclick="filterType('整層透天')">整層透天</span>
+  <span class="filter-btn" onclick="filterType('獨立套房')">獨立套房</span>
+  <span class="filter-btn" onclick="filterType('雅房')">雅房</span>
+  <span class="filter-btn" onclick="filterType('店面/商辦')">店面/商辦</span>
+  <span style="margin-left:16px;font-size:12px;color:#888;">|</span>
+  <span class="filter-btn" onclick="filterTag('furniture')">附家具</span>
+  <span class="filter-btn" onclick="filterTag('no-furniture')">無家具</span>
+  <span class="filter-btn" onclick="filterTag('renovated')">有裝修</span>
+  <span class="filter-btn" onclick="filterTag('no-renovate')">無裝修</span>
+</div>
+<div id="map"></div>
+<script>
+var center = [23.4798, 120.451594];
+var map = L.map('map').setView(center, 15);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap contributors', maxZoom: 19
+}).addTo(map);
+
+L.circle(center, {
+  radius: 1000, color: '#1F4E79', fillColor: '#2E75B6',
+  fillOpacity: 0.06, weight: 2, dashArray: '8, 6'
+}).addTo(map);
+
+var targetIcon = L.divIcon({
+  html: '<div style="background:#E63946;width:22px;height:22px;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.4);animation:pulse 2s infinite;"></div>',
+  iconSize: [28, 28], iconAnchor: [14, 14], className: ''
+});
+L.marker(center, {icon: targetIcon}).addTo(map)
+  .bindPopup('<b style="color:#E63946;font-size:15px;">★ 目標地址</b><br><b>公明路372號</b><br><span style="color:#666;">公明路與中山路口</span><br><span style="color:#888;">嘉北生活圈</span>');
+
+var iconColors = {
+  whole: '#2E75B6', townhouse: '#E67E22', suite: '#27AE60',
+  yafang: '#8E44AD', shop: '#7F8C8D'
+};
+function makeIcon(key) {
+  return L.divIcon({
+    html: '<div style="background:'+iconColors[key]+';width:14px;height:14px;border-radius:50%;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.3);cursor:pointer;"></div>',
+    iconSize: [18, 18], iconAnchor: [9, 9], className: ''
+  });
+}
+
+var listings = [
+  {lat:23.4838,lng:120.4528,type:'整層住家',iconKey:'whole',title:'嘉義公園4房~機械車位',addr:'東區圓福街32號',ping:'36.5坪',layout:'4房2廳2衛',rent:'23,800元/月',furniture:'有',renovation:'全新裝潢',source:'591租屋網',url:'https://rent.591.com.tw/20864179'},
+  {lat:23.4842,lng:120.452,type:'整層住家',iconKey:'whole',title:'忠孝路星巴克美兩房',addr:'東區忠孝北街226號',ping:'16.4坪',layout:'2房2廳1衛',rent:'20,000元/月',furniture:'有',renovation:'全新裝潢',source:'591租屋網',url:'https://rent.591.com.tw/20687028'},
+  {lat:23.4762,lng:120.4558,type:'整層住家',iconKey:'whole',title:'嘉義市東區精裝3房',addr:'東區吳鳳南路573號',ping:'58坪',layout:'3房1廳2衛',rent:'38,000元/月',furniture:'有',renovation:'高檔裝潢(400萬重新打造)',source:'591租屋網',url:'https://rent.591.com.tw/20854928'},
+  {lat:23.4815,lng:120.448,type:'整層住家',iconKey:'whole',title:'耐斯百貨旁公寓全新整理',addr:'東區仁義新村28號',ping:'20坪',layout:'2房2廳1衛',rent:'16,000元/月',furniture:'有',renovation:'中檔裝潢(全新整理)',source:'591租屋網',url:'https://rent.591.com.tw/21031185'},
+  {lat:23.477,lng:120.455,type:'整層住家',iconKey:'whole',title:'【安嘉租賃】2房採光佳',addr:'東區吳鳳南路521巷(敦南苑)',ping:'17.4坪',layout:'2房2廳',rent:'18,000元/月',furniture:'有',renovation:'簡易裝修',source:'591租屋網',url:'https://rent.591.com.tw/21028247'},
+  {lat:23.481,lng:120.4465,type:'整層住家',iconKey:'whole',title:'體育館/嘉工旁全新裝修',addr:'東區彌陀路192巷',ping:'18坪',layout:'1房2廳',rent:'15,600元/月',furniture:'有',renovation:'全新裝修',source:'591租屋網',url:'https://rent.591.com.tw/20905382'},
+  {lat:23.4795,lng:120.452,type:'整層透天',iconKey:'townhouse',title:'㊣公明路東市場旁店住',addr:'東區公明路1號',ping:'37.7坪',layout:'透天2層',rent:'25,000元/月',furniture:'無',renovation:'無裝潢(原始屋況)',source:'我家網',url:'https://www.myhomes.com.tw/rents/o/66317'},
+  {lat:23.4825,lng:120.449,type:'獨立套房',iconKey:'suite',title:'忠孝館時尚新穎電梯五星套房',addr:'東區忠孝路',ping:'7坪',layout:'1房',rent:'6,000元/月',furniture:'有',renovation:'簡易裝修',source:'591租屋網',url:'https://rent.591.com.tw/20937043'},
+  {lat:23.4822,lng:120.45,type:'獨立套房',iconKey:'suite',title:'健身頂加大陽台套房',addr:'東區民權路89號',ping:'18坪',layout:'1房',rent:'6,000元/月',furniture:'有',renovation:'簡易裝修',source:'591租屋網',url:'https://rent.591.com.tw/20900720'},
+  {lat:23.4818,lng:120.451,type:'獨立套房',iconKey:'suite',title:'市區優質電梯套房',addr:'東區民權路',ping:'7坪',layout:'1房',rent:'7,000元/月',furniture:'有',renovation:'簡易裝修',source:'591租屋網',url:'https://rent.591.com.tw/20789102'},
+  {lat:23.4815,lng:120.4515,type:'獨立套房',iconKey:'suite',title:'市區優質電梯套房(二)',addr:'東區民權路',ping:'6坪',layout:'1房',rent:'6,500元/月',furniture:'有',renovation:'簡易裝修',source:'591租屋網',url:'https://rent.591.com.tw/20789102'},
+  {lat:23.4808,lng:120.4535,type:'獨立套房',iconKey:'suite',title:'正市中心博東路美套房',addr:'東區博東路(宏都京都)',ping:'8坪',layout:'1房',rent:'5,500元/月',furniture:'有',renovation:'簡易裝修',source:'591租屋網',url:'https://rent.591.com.tw/20947152'},
+  {lat:23.479,lng:120.4545,type:'獨立套房',iconKey:'suite',title:'飯店式電梯大樓套房',addr:'東區立仁路10巷16號',ping:'8坪',layout:'1房',rent:'9,000元/月',furniture:'有',renovation:'全新裝潢(飯店式)',source:'591租屋網',url:'https://rent.591.com.tw/21027463'},
+  {lat:23.4805,lng:120.456,type:'獨立套房',iconKey:'suite',title:'秀泰商圈飯店式管理套房',addr:'東區長榮街235號',ping:'10坪',layout:'1房',rent:'9,100元/月',furniture:'有',renovation:'全新裝潢(飯店式管理)',source:'591租屋網',url:'https://rent.591.com.tw/20969463'},
+  {lat:23.478,lng:120.4555,type:'獨立套房',iconKey:'suite',title:'東市場電梯大套房出租',addr:'東區中正路191號',ping:'12坪',layout:'1房',rent:'10,000元/月',furniture:'有',renovation:'簡易裝修',source:'591租屋網',url:'https://rent.591.com.tw/20956497'},
+  {lat:23.4788,lng:120.454,type:'獨立套房',iconKey:'suite',title:'全新套房位於市中心',addr:'東區延平街',ping:'6坪',layout:'1房',rent:'5,000元/月',furniture:'有',renovation:'全新裝潢',source:'591租屋網',url:'https://rent.591.com.tw/20846667'},
+  {lat:23.4798,lng:120.4562,type:'獨立套房',iconKey:'suite',title:'嘉義市中心中正路套房',addr:'東區中正路325號',ping:'5坪',layout:'1房',rent:'7,000元/月',furniture:'有(附全套家電家俱)',renovation:'簡易裝修',source:'591租屋網',url:'https://rent.591.com.tw/20859717'},
+  {lat:23.4812,lng:120.447,type:'獨立套房',iconKey:'suite',title:'超優質溫馨附全套家電桌椅',addr:'東區彌陀路',ping:'5坪',layout:'1房',rent:'4,000元/月',furniture:'有(全套家電桌椅)',renovation:'簡易裝修',source:'591租屋網',url:'https://rent.591.com.tw/21008154'},
+  {lat:23.4802,lng:120.4475,type:'獨立套房',iconKey:'suite',title:'台林街獨立套房｜近耐斯嘉基',addr:'東區台林街',ping:'4坪',layout:'1房',rent:'5,000元/月',furniture:'有',renovation:'簡易裝修',source:'591租屋網',url:'https://rent.591.com.tw/20695791'},
+  {lat:23.481,lng:120.4482,type:'獨立套房',iconKey:'suite',title:'優質大套房(近耐斯嘉基)',addr:'東區台斗街',ping:'7坪',layout:'1房',rent:'7,500元/月',furniture:'有',renovation:'簡易裝修',source:'591租屋網',url:'https://rent.591.com.tw/21004584'},
+  {lat:23.4818,lng:120.4455,type:'獨立套房',iconKey:'suite',title:'全新女生電梯美套房(近嘉大)',addr:'東區市宅街22巷',ping:'6坪',layout:'1房',rent:'5,000元/月',furniture:'有',renovation:'全新裝潢',source:'591租屋網',url:'https://rent.591.com.tw/20952815'},
+  {lat:23.48,lng:120.4488,type:'獨立套房',iconKey:'suite',title:'套房嘉基耐斯好市多秀泰',addr:'東區義教街613巷',ping:'4坪',layout:'1房',rent:'5,000元/月',furniture:'有',renovation:'簡易裝修',source:'591租屋網',url:'https://rent.591.com.tw/20944520'},
+  {lat:23.4792,lng:120.455,type:'雅房',iconKey:'yafang',title:'女生住宿近文化路中正路口',addr:'東區中正路388號',ping:'6坪',layout:'雅房',rent:'3,600元/月',furniture:'有(基本)',renovation:'無裝潢',source:'591租屋網',url:'https://rent.591.com.tw/20902656'},
+  {lat:23.4795,lng:120.4525,type:'店面/商辦',iconKey:'shop',title:'㊣公明路東市場旁店面',addr:'東區公明路1號',ping:'37.7坪',layout:'店面',rent:'25,000元/月',furniture:'無',renovation:'無裝潢',source:'我家網',url:'https://www.myhomes.com.tw/rents/o/66317'},
+  {lat:23.48,lng:120.453,type:'店面/商辦',iconKey:'shop',title:'嘉市府旁中山路金店面',addr:'東區中山路',ping:'56.34坪',layout:'店面',rent:'30,000元/月',furniture:'無',renovation:'無裝潢',source:'我家網',url:'https://www.myhomes.com.tw/rents?s%5Bcity%5D=12&s%5Bdistrict%5D=374'},
+  {lat:23.4785,lng:120.4552,type:'店面/商辦',iconKey:'shop',title:'東市場店面出租',addr:'東區東市場附近',ping:'4.24坪',layout:'店面',rent:'16,000元/月',furniture:'無',renovation:'無裝潢',source:'我家網',url:'https://www.myhomes.com.tw/rents?s%5Bcity%5D=12&s%5Bdistrict%5D=374'}
+];
+
+var markers = [];
+var currentFilter = 'all';
+var currentTag = null;
+
+function createPopup(item) {
+  var furnitureTag = item.furniture && item.furniture !== '無'
+    ? '<span class="popup-tag tag-furniture">附家具</span>'
+    : '<span class="popup-tag tag-no-furniture">無家具</span>';
+  var renovationTag = item.renovation && !item.renovation.includes('無')
+    ? '<span class="popup-tag tag-renovated">' + item.renovation + '</span>'
+    : '<span class="popup-tag tag-no-renovate">無裝潢</span>';
+
+  return '<div style="min-width:240px;max-width:320px;">' +
+    '<b style="font-size:14px;color:#1F4E79;">' + item.title + '</b><br>' +
+    '<span style="color:' + iconColors[item.iconKey] + ';font-weight:bold;">' + item.type + '</span><br>' +
+    '<div style="margin:4px 0;">' + furnitureTag + renovationTag + '</div>' +
+    '<table style="font-size:12px;margin-top:4px;width:100%;">' +
+    '<tr><td style="color:#888;padding-right:8px;white-space:nowrap;">地址</td><td>' + item.addr + '</td></tr>' +
+    '<tr><td style="color:#888;">坪數</td><td>' + item.ping + '</td></tr>' +
+    '<tr><td style="color:#888;">格局</td><td>' + item.layout + '</td></tr>' +
+    '<tr><td style="color:#888;">月租</td><td style="color:#E63946;font-weight:bold;font-size:15px;">' + item.rent + '</td></tr>' +
+    '<tr><td style="color:#888;">來源</td><td>' + item.source + '</td></tr>' +
+    '</table>' +
+    '<a href="' + item.url + '" target="_blank" class="popup-link">🔗 前往' + item.source + '查看詳情</a>' +
+    '</div>';
+}
+
+listings.forEach(function(item) {
+  var marker = L.marker([item.lat, item.lng], {icon: makeIcon(item.iconKey)}).addTo(map);
+  marker.bindPopup(createPopup(item));
+  marker._data = item;
+  markers.push(marker);
+});
+
+function filterType(type) {
+  currentFilter = type;
+  currentTag = null;
+  applyFilter();
+  document.querySelectorAll('.filter-btn').forEach(function(btn) { btn.classList.remove('active'); });
+  event.target.classList.add('active');
+}
+
+function filterTag(tag) {
+  currentTag = (currentTag === tag) ? null : tag;
+  currentFilter = 'all';
+  applyFilter();
+  document.querySelectorAll('.filter-btn').forEach(function(btn) { btn.classList.remove('active'); });
+  if (currentTag) event.target.classList.add('active');
+  else document.querySelector('.filter-btn').classList.add('active');
+}
+
+function applyFilter() {
+  markers.forEach(function(m) {
+    var d = m._data;
+    var show = true;
+    if (currentFilter !== 'all' && d.type !== currentFilter) show = false;
+    if (currentTag === 'furniture' && (d.furniture === '無' || !d.furniture)) show = false;
+    if (currentTag === 'no-furniture' && d.furniture && d.furniture !== '無') show = false;
+    if (currentTag === 'renovated' && (!d.renovation || d.renovation.includes('無'))) show = false;
+    if (currentTag === 'no-renovate' && d.renovation && !d.renovation.includes('無')) show = false;
+    if (show) { if (!map.hasLayer(m)) map.addLayer(m); }
+    else { if (map.hasLayer(m)) map.removeLayer(m); }
+  });
+}
+
+var legend = L.control({position: 'bottomright'});
+legend.onAdd = function() {
+  var div = L.DomUtil.create('div', 'legend');
+  div.innerHTML = '<h4>圖例說明</h4>' +
+    '<div class="legend-item"><div class="legend-dot" style="background:#E63946;"></div> 目標地址</div>' +
+    '<div class="legend-item"><div class="legend-dot" style="background:#2E75B6;"></div> 整層住家/大樓</div>' +
+    '<div class="legend-item"><div class="legend-dot" style="background:#E67E22;"></div> 整層透天</div>' +
+    '<div class="legend-item"><div class="legend-dot" style="background:#27AE60;"></div> 獨立套房/分租套房</div>' +
+    '<div class="legend-item"><div class="legend-dot" style="background:#8E44AD;"></div> 雅房</div>' +
+    '<div class="legend-item"><div class="legend-dot" style="background:#7F8C8D;"></div> 店面/商辦</div>' +
+    '<div style="margin-top:8px;border-top:1px solid #eee;padding-top:6px;">' +
+    '<div style="font-size:11px;color:#666;margin-bottom:4px;"><b>標籤說明：</b></div>' +
+    '<span class="popup-tag tag-furniture">附家具</span> <span class="popup-tag tag-no-furniture">無家具</span><br>' +
+    '<span class="popup-tag tag-renovated">有裝修</span> <span class="popup-tag tag-no-renovate">無裝修</span>' +
+    '</div>' +
+    '<div style="margin-top:6px;border-top:1px solid #eee;padding-top:6px;font-size:11px;color:#999;">虛線圓 = 1公里範圍<br>點擊圓點可連結來源</div>';
+  return div;
+};
+legend.addTo(map);
+
+// Stats panel
+var stats = L.control({position: 'topleft'});
+stats.onAdd = function() {
+  var div = L.DomUtil.create('div', 'legend');
+  var total = listings.length;
+  var withFurniture = listings.filter(function(l) { return l.furniture && l.furniture !== '無'; }).length;
+  var withRenovation = listings.filter(function(l) { return l.renovation && !l.renovation.includes('無'); }).length;
+  div.innerHTML = '<h4>統計概覽</h4>' +
+    '<div style="font-size:12px;line-height:1.6;">' +
+    '物件總數：<b>' + total + '</b> 筆<br>' +
+    '附家具：<b>' + withFurniture + '</b> 筆 (' + Math.round(withFurniture/total*100) + '%)<br>' +
+    '有裝修：<b>' + withRenovation + '</b> 筆 (' + Math.round(withRenovation/total*100) + '%)<br>' +
+    '</div>';
+  return div;
+};
+stats.addTo(map);
+</script>
+<style>
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(230,57,70,0.5); }
+  70% { box-shadow: 0 0 0 10px rgba(230,57,70,0); }
+  100% { box-shadow: 0 0 0 0 rgba(230,57,70,0); }
+}
+</style>
+</body>
+</html>
